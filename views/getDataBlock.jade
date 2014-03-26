@@ -1,0 +1,11 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    
+  body
+    h3 Block of Data
+    ul
+      for doc in data
+        li #{doc.number} 

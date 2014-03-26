@@ -1,0 +1,39 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/style.css')
+
+    //-
+      Add a link to jQuery
+
+    script(src='http://code.jquery.com/jquery-1.11.0.min.js')
+
+    //-
+      Add a link to ajaxscripting.js, it is in this file you will
+      find the function startPostingData() which gets called when
+      the button gets called
+
+    script(src='/javascripts/ajaxposting.js')
+
+    //-
+      Add a link to ajaxpolling.js which contains the getDataFromServer
+      function. I could have put everything into the one js file but wanted
+      to keep the code that sends (POSTS) info to the server seperate from
+      the code the gets (POLLS) info from the server.
+
+    script(src='/javascripts/ajaxpolling.js')
+    
+  body(onload='getDataFromServer()')
+    div#menu
+      ul
+        li 
+          a(href='/') Home
+        li 
+          a(href='/getDataBlock') Data Block
+    h3= title
+    p Welcome to #{title}
+    div#postingStatus(class="off")
+    button(type='button', onclick='startPostingData()') Start Posting to server
+    button(type='button', onclick='stopPostingData()') Stop Posting to server
+    div#serverData

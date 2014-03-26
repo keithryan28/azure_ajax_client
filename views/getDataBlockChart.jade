@@ -1,0 +1,134 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/style.css')
+
+    //-
+      Ok, the Jade page is going to produce a html page that uses HighCharts. HighCharts
+      is a client side Javascript library which requires jQuery so lets include both of
+      them (jQuery first)
+
+    script(src='http://code.jquery.com/jquery-1.8.2.min.js')
+    script(src='http://code.highcharts.com/highcharts.js')
+
+    //-
+      Below is the Javascript code needed to draw a chart using HighCharts, specifically
+      the function drawChart(). If you look at that function you will see that we call the 
+      highcharts method and pass it a Javascript object which has a set of properties which
+      in turn are Javascript objects. One of these properties (the last one) is called 
+      series. The series property contains a data property which is equal to an array of
+      numbers to chart. For example, try set this series property to [1,2,3,4,5,,6,7,8,9]
+      and see what happens. Obviously we can't set the the series data to an array of
+      predefined numbers, we want to set it to an array of numbers that change depending
+      on what numbers we get out of the database. Essentially we want to set the series 
+      data to an array variable that gets populated everytime we render the getDataBlockChart.jade
+      page i.e. everytime we give back the html page. 
+      So I have created an array variable called chartData which I am going
+
+    script.
+      /*
+       * Unfortunately something like the following work in jade. Note dataFromDB is passed
+       * into the jade page
+       *
+       * var charData = #{dataFromDB};
+       *
+       * You can't pass jade variables into javascript code in a jade page :-(
+       *
+       * So instead I am going to create a blank array and write client side javascript
+       * code to add numbers to the array by calling the method addToChartDataArray
+       */
+
+      var chartData = [];
+
+      function addToChartDataArray(theData) {
+        chartData.push(theData);
+      }
+
+      function drawChart() {
+        chart = $('#chartContainer').highcharts({
+            chart: {
+                renderTo: 'container',
+                type: 'line',
+                alignTicks: false
+            },
+            title: {
+                text: 'Ajax + Node.js + Express.js + HighCharts'
+            },
+            subtitle: {
+                text: 'Source: Some random numbers'
+            },
+            xAxis: {
+                categories: [
+                    'Num'
+                ]
+            },
+            yAxis: {
+                min: 0,
+                minRange: 0,
+                max: 10,
+                startOnTick: true,
+                title: {
+                    text: 'Value'
+                }
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            series: [{
+                name: 'Num',
+                data: chartData
+                //data: [1,2,3,4,5,6,7,8,9]
+            }]
+        });
+      }
+    
+    //-
+      See the code below. It is writing out javascript code. Assuming that the array dataFromDB
+      contains the following :
+
+        [{number:1}, {number:2}, {number:3}, {number:4}, {number:5}]
+      
+      Then the code that will be written out below is:
+
+        <script type='text/javascript'>
+          function init() {
+            addToChartDataArray(1);
+            addToChartDataArray(2);
+            addToChartDataArray(3);
+            addToChartDataArray(4);
+            addToChartDataArray(5);
+            drawChart();
+          }
+        </script>
+
+      Note also that the init() function above gets called when the body tag is loaded. So when the
+      body is loaded the init() method gets called, the chartData get filled with numbers and then
+      the drawChart() function gets called which uses HighCharts to draw a chart.
+      
+    // END OF COMMENT
+
+    != "<script type='text/javascript'>"
+    != "function init() {"
+    for docs in dataFromDB
+      != "addToChartDataArray(" + docs.number + ");"
+    != "drawChart();"
+    != "}"
+    != "</script>"
+
+  body(onload='init();')
+    h3 Chart of Data
+
+    // HighCharts needs a div into which it "draws" the chart
+    div#chartContainer 
